@@ -49,7 +49,7 @@ public class Main {
 
     }
 
-    private void writeSquare(int x, int y, int x1, int y1) {
+    private void writeSquare(int x, int y, int x1, int y1,Color color) {
         int locx = 0;
         int locx1 = 0;
         int locy = 0;
@@ -57,37 +57,36 @@ public class Main {
         if (x < x1) {
             // x-4
             locx = x - 4;
-            locx1 = x1+4;
+            locx1 = x1 + 4;
         } else {
             locx = x1 - 4;
-            locx1 = x+4;
+            locx1 = x + 4;
         }
         if (y < y1) {
             // x-4
-            locy =y - 4;
-            locy1=y1+4;
+            locy = y - 4;
+            locy1 = y1 + 4;
         } else {
             locy = y1 - 4;
-            locy1=y+4;
+            locy1 = y + 4;
         }
         for (int i = locx; i < locx1; i++) {
-            img.setRGB(i, locy , Color.YELLOW.getRGB());
+            img.setRGB(i, locy, color.getRGB());
 
         }
         for (int i = locx; i < locx1; i++) {
-            img.setRGB(i, locy1 , Color.YELLOW.getRGB());
+            img.setRGB(i, locy1, color.getRGB());
 
         }
 
         for (int i = locy; i < locy1; i++) {
-            img.setRGB(locx-4, i , Color.YELLOW.getRGB());
+            img.setRGB(locx - 4, i, color.getRGB());
 
         }
         for (int i = locy; i < locy1; i++) {
-            img.setRGB(locx1+4, i , Color.YELLOW.getRGB());
+            img.setRGB(locx1 + 4, i,color.getRGB());
 
         }
-
 
 
     }
@@ -97,9 +96,17 @@ public class Main {
         for (point point : randompoints) {
             for (point point_ : point.neighbours) {
                 int temp = pisagor(point.x, point.y, point_.x, point_.y);
-                if (temp < 30) {
-                    writeSquare(point.x, point.y, point_.x, point_.y);
+                if (temp < 20) {
+                    writeSquare(point.x, point.y, point_.x, point_.y,Color.YELLOW);
+
                 }
+                else if (temp<50)
+                    writeSquare(point.x, point.y, point_.x, point_.y,Color.gray);
+                else if (temp<70)
+                    writeSquare(point.x, point.y, point_.x, point_.y,Color.green);
+                else if (temp<100)
+                    writeSquare(point.x, point.y, point_.x, point_.y,Color.ORANGE);
+
             }
 
         }
