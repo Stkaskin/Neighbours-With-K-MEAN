@@ -7,7 +7,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class Main extends Thread {
+public class Main {
     static int height = 1000;
     static int weight = 1000;
     static BufferedImage img;
@@ -17,6 +17,7 @@ public class Main extends Thread {
         int x = 0;
         int y = 0;
         Color color;
+        ArrayList<point> neighbours = new ArrayList<>();
 
     }
 
@@ -34,14 +35,86 @@ public class Main extends Thread {
         for (int i = 0; i < 150; i++)
             new Main().setRandompoints();
         startProgram();
-        new Main().start();
         new Main().startKmean();
         KmeanStepNext();
         new Main().startKmean();
         KmeanStepNext();
         new Main().startKmean();
         KmeanStepNext();
+        new Main().findNeighbour();
+        new Main().NeigbourColorChange();
+        new Main().run();
+
         System.out.println("Hello world!");
+
+    }
+
+    private void writeSquare(int x, int y, int x1, int y1) {
+        int locx = 0;
+        int locx1 = 0;
+        int locy = 0;
+        int locy1 = 0;
+        if (x < x1) {
+            // x-4
+            locx = x - 4;
+            locx1 = x1+4;
+        } else {
+            locx = x1 - 4;
+            locx1 = x+4;
+        }
+        if (y < y1) {
+            // x-4
+            locy =y - 4;
+            locy1=y1+4;
+        } else {
+            locy = y1 - 4;
+            locy1=y+4;
+        }
+        for (int i = locx; i < locx1; i++) {
+            img.setRGB(i, locy , Color.YELLOW.getRGB());
+
+        }
+        for (int i = locx; i < locx1; i++) {
+            img.setRGB(i, locy1 , Color.YELLOW.getRGB());
+
+        }
+
+        for (int i = locy; i < locy1; i++) {
+            img.setRGB(locx-4, i , Color.YELLOW.getRGB());
+
+        }
+        for (int i = locy; i < locy1; i++) {
+            img.setRGB(locx1+4, i , Color.YELLOW.getRGB());
+
+        }
+
+
+
+    }
+
+    private void NeigbourColorChange() {
+
+        for (point point : randompoints) {
+            for (point point_ : point.neighbours) {
+                int temp = pisagor(point.x, point.y, point_.x, point_.y);
+                if (temp < 30) {
+                    writeSquare(point.x, point.y, point_.x, point_.y);
+                }
+            }
+
+        }
+    }
+
+    private void findNeighbour() {
+        for (point point : randompoints) {
+            for (point point_ : randompoints) {
+                if (point == point_)
+                    continue;
+                int temp = pisagor(point.x, point.y, point_.x, point.y);
+                if (temp < 70)
+                    point.neighbours.add(point_);
+            }
+        }
     }
 
     private void startKmean() {
@@ -102,17 +175,17 @@ public class Main extends Thread {
 
     private void ReferancePointsAdd(Color color) {
         point p = new point();
-        p.x = new Random().nextInt(0, 1000);
+        p.x = new Random().nextInt(10, 990);
 
-        p.y = new Random().nextInt(0, 1000);
+        p.y = new Random().nextInt(10, 990);
         p.color = color;
         referancePoints.add(p);
     }
 
     private void setRandompoints() {
         point p = new point();
-        p.x = new Random().nextInt(0, 1000);
-        p.y = new Random().nextInt(0, 1000);
+        p.x = new Random().nextInt(10, 990);
+        p.y = new Random().nextInt(10, 990);
         WritePointRandom(p, Color.RED);
         randompoints.add(p);
 
@@ -125,17 +198,16 @@ public class Main extends Thread {
         int col = (r << 16) | (g << 8) | b;
         File f = new File("MyFile.png");
         try {
-            img.setRGB(p.x-1, p.y, col);
-            img.setRGB(p.x-2, p.y-1, col);
-            img.setRGB(p.x-2, p.y+1, col);
-            img.setRGB(p.x, p.y-1, col);
-            img.setRGB(p.x+1, p.y-2, col);
-            img.setRGB(p.x-1, p.y-2, col);
-            img.setRGB(p.x+1, p.y, col);
-            img.setRGB(p.x+2, p.y+1, col);
-            img.setRGB(p.x+2, p.y-1, col);
-            img.setRGB(p.x, p.y+1, col);
-
+            img.setRGB(p.x - 1, p.y, col);
+            img.setRGB(p.x - 2, p.y - 1, col);
+            img.setRGB(p.x - 2, p.y + 1, col);
+            img.setRGB(p.x, p.y - 1, col);
+            img.setRGB(p.x + 1, p.y - 2, col);
+            img.setRGB(p.x - 1, p.y - 2, col);
+            img.setRGB(p.x + 1, p.y, col);
+            img.setRGB(p.x + 2, p.y + 1, col);
+            img.setRGB(p.x + 2, p.y - 1, col);
+            img.setRGB(p.x, p.y + 1, col);
             img.setRGB(p.x, p.y, col);
 
         } catch (Exception e) {
