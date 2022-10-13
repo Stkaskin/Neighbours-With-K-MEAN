@@ -4,16 +4,17 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class Main {
     static int height = 1000;
     static int weight = 1000;
     static BufferedImage img;
     static Map<point, point> neigmatch = new HashMap<>();
+    //duraklar
+    static ArrayList<point> randompoints = new ArrayList<>();
+    static Color defautColor = Color.WHITE;
+    //referance servisler
     static ArrayList<point> referancePoints = new ArrayList<>();
 
     class point {
@@ -24,8 +25,6 @@ public class Main {
 
     }
 
-    static ArrayList<point> randompoints = new ArrayList<>();
-    static Color defautColor = Color.WHITE;
 
     public static void main(String[] args) throws Exception {
         WriteBitmapBlank();
@@ -34,7 +33,10 @@ public class Main {
         new Main().ReferancePointsAdd(Color.BLACK);
         new Main().ReferancePointsAdd(Color.CYAN);
         new Main().ReferancePointsAdd(Color.MAGENTA);
+        for (var ref:referancePoints) {
+            new Main().writeSquare(ref.x, ref.y, ref.x + 10, ref.y + 10, Color.RED);
 
+        }
         for (int i = 0; i < 150; i++)
             new Main().setRandompoints();
         startProgram();
@@ -44,13 +46,21 @@ public class Main {
         KmeanStepNext();
         new Main().startKmean();
         KmeanStepNext();
-        new Main().findNeighbour();
+        // new Main().findNeigboursLevel(0, 4);
+        new Main().findNeigboursMinMax(0, 1000, 5);
+        // new Main().findNeighbour(0, 20);
+        // new Main().findNeighbour(21, 50);
+        // new Main().findNeighbour(51, 100);
+        //  new Main().findNeighbour(101, 200);
+        //new Main().findNeighbour(201,300);
         new Main().NeigbourColorChange();
      /*   for (Map.Entry<Main.point, Main.point> pointpointEntry:neigmatch.entrySet())
         {
             new Main().WriteDoublePoint(pointpointEntry.getKey(),pointpointEntry.getValue());
         }*/
-
+        for (var r : randompoints) {
+            WritePointRandom(r, r.color);
+        }
         new Main().run();
 
         System.out.println("Hello world!");
@@ -99,7 +109,7 @@ public class Main {
 
     }
 
-    private void WriteDoublePoint(point w1, point w2,Color color) {
+    private void WriteDoublePoint(point w1, point w2, Color color) {
 
         double pointerx = w1.x;
         double pointery = w1.y;
@@ -136,10 +146,10 @@ public class Main {
 
                 neigmatch.put(point, point_);
                 neigmatch.put(point_, point);
-                new Main().WriteDoublePoint(point, point_,color);
+                new Main().WriteDoublePoint(point, point_, color);
             }
             if (pointallcross)
-                new Main().WriteDoublePoint(point, point_,color);
+                new Main().WriteDoublePoint(point, point_, color);
             if (square)
                 writeSquare(point.x, point.y, point_.x, point_.y, color);
             return true;
@@ -153,11 +163,13 @@ public class Main {
         for (point point : randompoints) {
             for (point point_ : point.neighbours) {
                 int temp = pisagor(point.x, point.y, point_.x, point_.y);
-                if (NeigbourColorSwitch(point, point_, temp, 20, Color.YELLOW,true,true,true)) ;
+                if (NeigbourColorSwitch(point, point_, temp, 20, Color.YELLOW, false, true, false)) ;
                 else if (
-                        NeigbourColorSwitch(point, point_, temp, 50, Color.GRAY,true,true,true)) ;
-                else if (NeigbourColorSwitch(point, point_, temp, 70, Color.RED,true,true,true)) ;
-                else if (NeigbourColorSwitch(point, point_, temp, 70, Color.green,true,true,true)) ;
+                        NeigbourColorSwitch(point, point_, temp, 50, Color.GRAY, false, true, false)) ;
+                else if (NeigbourColorSwitch(point, point_, temp, 70, Color.RED, false, true, false)) ;
+                else if (NeigbourColorSwitch(point, point_, temp, 120, Color.green, false, true, false)) ;
+                else if (NeigbourColorSwitch(point, point_, temp, 200, Color.BLACK, false, true, false)) ;
+                else if (NeigbourColorSwitch(point, point_, temp, 300, Color.PINK, false, true, false)) ;
 
 
             }
@@ -165,13 +177,91 @@ public class Main {
         }
     }
 
-    private void findNeighbour() {
+
+    private void findNeigboursLevel(int minlevel, int maxlevel) {
+        int ref = -1;
+        for (var p : randompoints) {
+            ref++;
+            int[] mins = new int[]{0, 21, 51, 71, 101, 201, 301, 501};
+            int[] max = new int[]{20, 50, 70, 100, 200, 300, 500, 1000};
+            int found = 0;
+            for (int i = minlevel; i < max.length && i < maxlevel; i++) {
+
+
+                findNeighbourOne(ref, mins[i], max[i], max.length - i);
+
+            }
+        }
+    }
+
+    private void findNeigboursMinMax(int min, int max, int near) {
+        int ref = -1;
+        for (var p : randompoints) {
+            ref++;
+            findNeighbourOne(ref, min, max, near);
+
+
+        }
+    }
+
+    class distance {
+        point point;
+        double distance;
+
+        distance(point p, double d) {
+            this.point = p;
+            distance = d;
+        }
+
+        distance() {
+        }
+
+        public Main.point getPoint() {
+            return point;
+        }
+
+        public void setPoint(Main.point point) {
+            this.point = point;
+        }
+
+        public double getDistance() {
+            return distance;
+        }
+
+        public void setDistance(double distance) {
+            this.distance = distance;
+        }
+    }
+
+    private void findNeighbourOne(int point, int min, int max, int found) {
+        ArrayList<distance> dis = new ArrayList<>();
+        for (point point_ : randompoints) {
+            if (randompoints.get(point) == point_)
+                continue;
+            double temp = pisagor(randompoints.get(point).x, randompoints.get(point).y, point_.x, point_.y);
+            if (min < temp && temp < max)
+
+
+                dis.add(new distance(point_, temp));
+         /*   found--;
+            if (found == 0)
+                break;*/
+        }
+        dis.sort(Comparator.comparing(distance::getDistance));
+        for (int i = 0; i < dis.size() && i < found; i++) {
+            randompoints.get(point).neighbours.add(dis.get(i).point);
+        }
+
+
+    }
+
+    private void findNeighbour(int min, int max) {
         for (point point : randompoints) {
             for (point point_ : randompoints) {
                 if (point == point_)
                     continue;
-                int temp = pisagor(point.x, point.y, point_.x, point.y);
-                if (temp < 70)
+                int temp = pisagor(point.x, point.y, point_.x, point_.y);
+                if (min < temp && temp < max)
                     point.neighbours.add(point_);
             }
         }
@@ -239,6 +329,7 @@ public class Main {
 
         p.y = new Random().nextInt(10, 990);
         p.color = color;
+
         referancePoints.add(p);
     }
 
